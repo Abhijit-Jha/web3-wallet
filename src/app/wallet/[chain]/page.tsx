@@ -1,9 +1,8 @@
 "use client";
-import { Button } from '@/components/ui/button';
 import { ChainType, useSeedPhraseState } from '@/context/seed';
 import React, { useState } from 'react';
 import { Keypair } from "@solana/web3.js";
-import bip39 from 'bip39';
+import * as bip39 from 'bip39';
 import { derivePath } from 'ed25519-hd-key';
 import bs58 from 'bs58';
 import { ethers } from "ethers";
@@ -16,7 +15,6 @@ import Mneomic from '@/components/Mneomic';
 import WalletHeader from '@/components/WalletHeader';
 import { useParams } from 'next/navigation';
 import { toast } from 'sonner';
-import Footer from '@/components/Footer';
 
 const Page = () => {
     const { mnemonics } = useSeedPhraseState();
@@ -55,13 +53,13 @@ const Page = () => {
             });
 
         } else if (chainParam === 'btc') {
-            const path = `m/44'/0'/${account}'/0/0`;
+            const path = `m/44'/0'/${account}'/0/0`; //1 for testnet, 0 for mainnet
             const bip32 = BIP32Factory(ecc);
             const root = bip32.fromSeed(seed);
             const child = root.derivePath(path);
             const { address } = bitcoin.payments.p2pkh({
                 pubkey: Buffer.from(child.publicKey),
-                network: bitcoin.networks.bitcoin
+                network: bitcoin.networks.bitcoin //or testnet
             });
 
             setKey({
