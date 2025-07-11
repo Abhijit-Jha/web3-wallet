@@ -15,9 +15,13 @@ import Mneomic from '@/components/Mneomic';
 import WalletHeader from '@/components/WalletHeader';
 import { useParams } from 'next/navigation';
 import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+// import { generateSeedPhraseAndStore } from '@/lib/utils/generateSeedPhraseAndStore';
 
 const Page = () => {
-    const { mnemonics } = useSeedPhraseState();
+    const { mnemonics, setMnemonics } = useSeedPhraseState();
+    const [inputMneomnics, setInputMnemonics] = useState('');
     const [account, setUseAccount] = useState(0);
     const params = useParams();
 
@@ -31,6 +35,10 @@ const Page = () => {
     const { keys, setKey, clearKeys, deleteKey } = getStore[chainParam];
 
     async function createWallet() {
+        if (!mnemonics) {
+            toast.error('Please generate a mnemonic first');
+            return;
+        }
         const seed = bip39.mnemonicToSeedSync(mnemonics);
 
         if (chainParam === 'sol') {
@@ -71,6 +79,46 @@ const Page = () => {
         setUseAccount(account + 1);
     }
 
+    if (!mnemonics) {
+        return (
+            <div className="m-10 space-y-4">
+                <h2 className="text-xl font-semibold text-zinc-800 dark:text-zinc-100">
+                    Mnemonic Not Found
+                </h2>
+                <p className="text-zinc-600 dark:text-zinc-400">
+                    Please generate or paste your mnemonic phrase to create wallets.
+                </p>
+                <div className='sm:flex gap-2 h-20 w-full space-y-4'>
+                    <Input
+                        placeholder="Enter your Mnemonic or leave empty to generate"
+                        className="sm:w-5/6 h-12 "
+                        onChange={(e) => {
+                            setInputMnemonics(e.target.value);
+                        }}
+                    />
+                    <Button variant="default" className="sm:w-1/6 rounded-sm h-12 cursor-pointer w-full"
+                        onClick={() => {
+                            if (!inputMneomnics) {
+                                const generatedMnemonic = bip39.generateMnemonic();
+                                setMnemonics(generatedMnemonic);
+                                toast.success('Wallet Created Successfully');
+
+                            } else {
+                                if (bip39.validateMnemonic(inputMneomnics)) {
+                                    setMnemonics(inputMneomnics);
+                                    toast.success('Wallet Created Successfully');
+                                } else {
+                                    toast.error('Invalid mnemonic phrase Please check again!!');
+                                }
+                            }
+                        }}>
+                        {inputMneomnics ? "Import wallet" : "Generate Seed Phrase"}
+                    </Button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="sm:mx-12 mx-6 space-y-6">
             <Mneomic mnemonics={mnemonics} />
@@ -79,6 +127,7 @@ const Page = () => {
                 {keys.map((data, index) => (
                     <WalletCard
                         key={`${data.publicKey}-${index}`}
+                        walletNumber={index + 1}
                         secretKey={data.secretKey}
                         publicKey={data.publicKey}
                         handleWalletDeletion={() => {

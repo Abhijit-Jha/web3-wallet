@@ -2,25 +2,18 @@
 import React from 'react';
 import { Button } from './ui/button';
 import { LinkPreview } from './ui/link-preview';
-import { generateSeedPhraseAndStore } from '@/lib/utils/generateSeedPhraseAndStore';
 import { useRouter } from 'next/navigation';
 import Footer from './Footer';
 import { toast } from 'sonner';
+import { useSeedPhraseState } from '@/context/seed';
 
 const Hero = () => {
     const router = useRouter();
-
+    const {setChain} = useSeedPhraseState();    
     const handleClick = async (chain: 'sol' | 'btc' | 'eth') => {
-        try {
-            await generateSeedPhraseAndStore(chain);
-            const chainName = chain.charAt(0).toUpperCase() + chain.slice(1);
-
-            toast.success(`${chainName} wallet created successfully 🚀`);
-            router.push(`/wallet/${chain}`);
-        } catch (error) {
-            toast.error(`Failed to create ${chain.toUpperCase()} wallet. Please try again.`);
-            console.error(error);
-        }
+        setChain(chain);
+        router.push(`/wallet/${chain}`);
+        toast.success(`Redirecting to ${chain.toUpperCase()} wallet... 🚀`);
     };
 
 
