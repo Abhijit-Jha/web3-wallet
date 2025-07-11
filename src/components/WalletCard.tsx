@@ -38,7 +38,7 @@ const WalletCard: React.FC<WalletCardProps> = ({ publicKey, secretKey, handleWal
 
   useEffect(() => {
     const fetchBalance = async () => {
-      let result = await getETHTokenBalance(publicKey);
+      let result;
       if (selectedChain == 'eth') {
         result = await getETHTokenBalance(publicKey);
       } else if (selectedChain == 'sol') {
